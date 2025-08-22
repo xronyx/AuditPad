@@ -284,23 +284,13 @@ public class AuditPad implements BurpExtension {
         }
         
         public static Color getTitledBorderTextColor() {
-            // Use a slightly emphasized text color for titled borders
-            Color text = getTextColor();
+            // Simple and clear: WHITE text for dark theme, BLACK text for light theme
             boolean isDark = isDarkTheme();
+            
             if (isDark) {
-                // In dark theme, make text slightly brighter
-                return new Color(
-                    Math.min(255, text.getRed() + 20),
-                    Math.min(255, text.getGreen() + 20),
-                    Math.min(255, text.getBlue() + 20)
-                );
+                return Color.WHITE; // Pure white text for dark theme
             } else {
-                // In light theme, make text slightly darker
-                return new Color(
-                    Math.max(0, text.getRed() - 20),
-                    Math.max(0, text.getGreen() - 20),
-                    Math.max(0, text.getBlue() - 20)
-                );
+                return Color.BLACK; // Pure black text for light theme
             }
         }
         
@@ -383,6 +373,30 @@ public class AuditPad implements BurpExtension {
                 if (controlBrightness < 384) {
                     return true;
                 }
+            }
+            
+            // Method 4: Check window background (often used by Burp Suite)
+            Color windowBg = UIManager.getColor("window");
+            if (windowBg != null) {
+                int windowBrightness = windowBg.getRed() + windowBg.getGreen() + windowBg.getBlue();
+                if (windowBrightness < 384) {
+                    return true;
+                }
+            }
+            
+            // Method 5: Check table background (Burp uses many tables)
+            Color tableBg = UIManager.getColor("Table.background");
+            if (tableBg != null) {
+                int tableBrightness = tableBg.getRed() + tableBg.getGreen() + tableBg.getBlue();
+                if (tableBrightness < 384) {
+                    return true;
+                }
+            }
+            
+            // Method 6: Assume dark theme if we can't get proper colors (conservative approach for visibility)
+            if (bg == null && textColor == null && controlBg == null) {
+                // If we can't determine colors, err on the side of dark theme for better visibility
+                return true;
             }
             
             // Default to light theme if we can't determine
